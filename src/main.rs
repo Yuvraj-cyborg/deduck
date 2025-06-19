@@ -34,7 +34,6 @@ enum Commands {
 fn main() {
     let cli = Cli::parse();
 
-    // Extract Option<PathBuf> from command
     let dir_opt = match &cli.command {
         Commands::Scan { dir } => dir,
         Commands::Filter { dir } => dir,
@@ -43,10 +42,8 @@ fn main() {
         Commands::Purge { dir } => dir,
     };
 
-    // Resolve to PathBuf
     let dir = get_dir_or_saved(dir_opt);
 
-    // Call respective command run function
     let result = match &cli.command {
         Commands::Scan { .. } => scan::run_scan(dir.as_path()),
         Commands::Filter { .. } => filter::run_filter(dir.as_path()),
