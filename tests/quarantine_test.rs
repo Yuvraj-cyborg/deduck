@@ -22,10 +22,8 @@ fn test_quarantine_and_restore() {
     writeln!(file1, "hello world").unwrap();
     writeln!(file2, "hello rust").unwrap();
 
-    // Quarantine the files
     quarantine_duplicates(vec![file1_path.clone(), file2_path.clone()], &quarantine_dir).unwrap();
 
-    // Files should be moved from original dir to quarantine dir
     assert!(!file1_path.exists());
     assert!(!file2_path.exists());
     assert!(quarantine_dir.join("file1.txt").exists());
