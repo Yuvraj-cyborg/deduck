@@ -108,23 +108,31 @@ See the architecture diagram above ☝️
 
 ## 📂 Folder Structure
 
+```
 deduck/
 ├── src/
 │   ├── main.rs
 │   ├── config.rs
-│   ├── quarantine.rs
-│   ├── hasher.rs
+│   ├── duplicates.rs
 │   ├── filters.rs
-│   ├── scanner.rs
+│   ├── hasher.rs
+│   ├── lib.rs
+│   ├── prompts.rs
+│   ├── quarantine.rs
 │   ├── report.rs
+│   ├── scanner.rs
 │   └── commands/
 │       ├── clean.rs
 │       ├── filter.rs
+│       ├── mod.rs
 │       ├── purge.rs
 │       ├── restore.rs
 │       └── scan.rs
 ├── tests/
+│   ├── filter_test.rs
+│   ├── hasher_test.rs
 │   ├── quarantine_test.rs
-│   └── hasher_test.rs
+│   └── scanner_test.rs
 └── assets/
-    └── deduck_architecture.png
+    └── architecture.jpeg
+```
