@@ -1,16 +1,17 @@
-use std::path::Path;
-use std::path::PathBuf;
+use std::io;
+use std::path::{Path, PathBuf};
 use walkdir::WalkDir;
 
-pub fn scan_directory(path: &Path) -> Result<Vec<PathBuf>, walkdir::Error> {
-    let mut path_vec: Vec<PathBuf> = Vec::new();
-        for entry in WalkDir::new(path) {
-            let entry = entry?;
-             let entry_path = entry.path();
-
-         if entry_path.is_file() {
-            path_vec.push(entry_path.to_path_buf());
-        }
+pub fn scan_directory(dir: &Path) -> io::Result<Vec<PathBuf>> {
+    if !dir.exists() {
+        return Err(io::Error::new(io::ErrorKind::NotFound, "Directory does not exist"));
     }
-    Ok(path_vec)
+
+    let mut files = Vec::new();
+
+    for entry in WalkDir::new(dir).into_iter().filter_map(Result::ok).filter(|e| e.file_type().is_file()) {
+        files.push(entry.path().to_path_buf());
+    }
+
+    Ok(files)
 }
