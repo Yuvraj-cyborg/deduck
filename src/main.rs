@@ -17,6 +17,10 @@ use config::get_dir_or_saved;
 
 #[derive(Parser, Debug)]
 #[command(name = "deduck", version = "0.1.0", author = "Yuvraj Biswal")]
+#[command(
+    about = "Scan for duplicate files",
+    long_about = "Deduck recursively scans a directory and identifies duplicate files using their hashes.\nYou can use --dir <path> to specify the starting directory."
+)]
 struct Cli {
     #[command(subcommand)]
     command: Commands,

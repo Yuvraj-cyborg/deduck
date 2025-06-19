@@ -1,6 +1,5 @@
 use std::path::{PathBuf, Path};
 use std::io;
-
 use crate::{scanner, filters, hasher::{hash_files, HashAlgorithm}, quarantine};
 
 pub fn find_and_process_duplicates<F>(dir: &Path, scan_choice: usize, mut processor: F) -> io::Result<usize>
