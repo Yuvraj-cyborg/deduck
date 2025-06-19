@@ -7,6 +7,13 @@ edition = "2024"
 clap = { version = "4.4", features = ["derive"] }
 walkdir = "2"
 tempfile = "3"
+sha2 = "0.10"
+blake3 = "1"
+twox-hash = "1"
+rayon = "1"
+dialoguer = "0.11"
+dirs = "4.0"
+
 
 [lib]
 name = "deduck"
