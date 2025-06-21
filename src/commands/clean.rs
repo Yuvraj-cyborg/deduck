@@ -1,10 +1,11 @@
 use crate::prompts;
 use crate::duplicates;
-use crate::quarantine;
 use crate::report::Report;
 use crate::config::load_scan_mode;
-use std::path::{Path, PathBuf};
+
+use std::fs;
 use std::io;
+use std::path::{Path};
 
 pub fn run_clean(dir: &Path) -> io::Result<()> {
     let scan_choice = match load_scan_mode() {
@@ -17,32 +18,44 @@ pub fn run_clean(dir: &Path) -> io::Result<()> {
 
     let clean_choice = prompts::prompt_clean_choice()?;
     let quarantine_dir = dir.join(".deduck_quarantine");
+
     let mut report = Report::new();
 
-    let processor = |paths: &Vec<PathBuf>| {
-        let duplicates: Vec<_> = paths.iter().skip(1).cloned().collect();
+    let files_found = duplicates::find_and_process_duplicates(dir,scan_choice,true)?;
 
-        for dup in &duplicates {
-            if let Ok(meta) = std::fs::metadata(dup) {
-                report.add_file(dup.clone(), meta.len());
-            }
-        }
-
-        if let Err(e) = quarantine::quarantine_duplicates(duplicates, &quarantine_dir) {
-            eprintln!("Failed to quarantine: {}", e);
-        }
-    };
-
-    let files_found = duplicates::find_and_process_duplicates(dir, scan_choice, processor)?;
     report.set_files_found(files_found);
+    process_quarantined_files(&quarantine_dir, &mut report)?;
 
     if clean_choice == 1 {
-        if quarantine_dir.exists() {
-            std::fs::remove_dir_all(&quarantine_dir)?;
-            println!("🗑️ Quarantine folder deleted: {}", quarantine_dir.display());
-        }
+        delete_quarantine_dir(&quarantine_dir)?;
         report.display();
     }
 
+    Ok(())
+}
+
+fn process_quarantined_files(quarantine_dir: &Path,report: &mut Report,) -> io::Result<()> {
+    if !quarantine_dir.exists() {
+        return Ok(());
+    }
+
+    let entries = fs::read_dir(quarantine_dir)?;
+    for entry in entries {
+        let entry = entry?;
+        let path = entry.path();
+
+        if let Ok(metadata) = fs::metadata(&path) {
+            report.add_file(path, metadata.len());
+        }
+    }
+
+    Ok(())
+}
+
+fn delete_quarantine_dir(path: &Path) -> io::Result<()> {
+    if path.exists() {
+        fs::remove_dir_all(path)?;
+        println!("🗑️ Quarantine folder deleted: {}", path.display());
+    }
     Ok(())
 }

@@ -29,7 +29,10 @@ struct Cli {
 #[derive(Subcommand, Debug)]
 enum Commands {
     Scan { #[arg(short, long)] dir: Option<PathBuf> },
-    Filter { #[arg(short, long)] dir: Option<PathBuf> },
+    Filter { 
+        #[arg(short, long)] 
+        dir: Option<PathBuf> 
+    },
     Clean { #[arg(short, long)] dir: Option<PathBuf> },
     Restore { #[arg(short, long)] dir: Option<PathBuf> },
     Purge { #[arg(short, long)] dir: Option<PathBuf> },

@@ -10,7 +10,7 @@ pub fn batch(files: Vec<PathBuf>, allowed_exts: &[&str]) -> std::io::Result<Hash
             if allowed_exts.contains(&ext) {
                 let metadata = fs::metadata(&file)?;
                 let size = metadata.len();
-                let key = (ext.to_string(), size);
+                let key: (String, u64) = (ext.to_string(), size);
                 batches.entry(key).or_default().push(file);
             }
         }

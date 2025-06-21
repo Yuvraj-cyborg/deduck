@@ -2,13 +2,14 @@ use std::fs::File;
 use std::io::{BufReader, Read};
 use std::path::PathBuf;
 use std::collections::HashMap;
-
 use rayon::prelude::*;
+use indicatif::ParallelProgressIterator;
 use sha2::{Sha256, Digest};
 use blake3;
 use twox_hash::XxHash64;
 use std::hash::Hasher;
 
+use indicatif::{ProgressBar};
 
 #[derive(Debug, Clone)]
 pub enum HashAlgorithm {
@@ -55,29 +56,30 @@ pub fn hash_file(path: &PathBuf, algo: &HashAlgorithm) -> std::io::Result<String
     }
 }
 
-pub fn hash_files(files: Vec<PathBuf>, algo: HashAlgorithm) -> HashMap<String, Vec<PathBuf>> {
+pub fn hash_files(files: Vec<PathBuf>,algo: HashAlgorithm,pb: ProgressBar,) -> HashMap<String, Vec<PathBuf>> {
     files
-        .into_par_iter()
+        .par_iter()
+        .progress_with(pb)
         .filter_map(|file| {
-            match hash_file(&file, &algo) {
-                Ok(hash) => Some((hash, file)),
-                Err(_) => None,
+            match hash_file(file, &algo) {
+            Ok(hash) => Some((hash, file.clone())),
+            Err(_) => None,
             }
-        })
-        .fold(
-            || HashMap::<String, Vec<PathBuf>>::new(), // ID
-            |mut acc, (hash, path)| {
-                acc.entry(hash).or_default().push(path);
-                acc
-            },
-        )
-        .reduce(
-            || HashMap::new(), // identity for reduce
-            |mut acc, map| {
-                for (hash, paths) in map {
-                    acc.entry(hash).or_default().extend(paths);
-                }
-                acc
-            },
-        )
+     })
+        .fold(HashMap::new, add_to_map)
+        .reduce(HashMap::new, merge_maps)
+}
+
+
+fn add_to_map( mut acc: HashMap<String, Vec<PathBuf>>,item: (String, PathBuf)) -> HashMap<String, Vec<PathBuf>> {
+    let (hash, path) = item;
+    acc.entry(hash).or_default().push(path);
+    acc
+}
+
+fn merge_maps( mut acc: HashMap<String, Vec<PathBuf>>, map: HashMap<String, Vec<PathBuf>>) -> HashMap<String, Vec<PathBuf>> {
+    for (hash, paths) in map {
+        acc.entry(hash).or_default().extend(paths);
+    }
+    acc
 }

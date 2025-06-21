@@ -1,23 +1,30 @@
-use std::path::{PathBuf, Path};
+use std::collections::HashMap;
 use std::io;
-use crate::{scanner, filters, hasher::{hash_files, HashAlgorithm}, quarantine};
+use std::path::{Path, PathBuf};
 
-pub fn find_and_process_duplicates<F>(dir: &Path, scan_choice: usize, mut processor: F) -> io::Result<usize>
-where
-    F: FnMut(&Vec<PathBuf>),
-{
+use indicatif::{ProgressBar, ProgressStyle};
+
+use crate::{
+    scanner,
+    filters,
+    hasher::{hash_files, HashAlgorithm},
+    quarantine,
+};
+
+pub fn find_and_process_duplicates(dir: &Path,scan_choice: usize,quarantine_flag: bool,) -> io::Result<usize> {
     let files = scanner::scan_directory(dir)?;
     let files_found = files.len();
+
     if files.is_empty() {
         println!("❌ No files found in the directory.");
-        return Ok(files_found);
+        return Ok(0);
     }
 
-    let allowed_exts = ["pdf", "png", "txt", "doc"];
+    let allowed_exts = ["pdf", "png", "txt", "doc", "xlsx", "jpeg", "jpg"];
     let batches = filters::batch(files, &allowed_exts)?;
 
     if batches.is_empty() {
-        println!("No files matching allowed extensions found.");
+        println!("⚠️ No files matching allowed extensions found.");
         return Ok(files_found);
     }
 
@@ -28,24 +35,40 @@ where
         _ => unreachable!(),
     };
 
+    let all_files: Vec<PathBuf> = batches
+        .values()
+        .flat_map(|v| v.clone())
+        .collect();
+
+    let pb = ProgressBar::new(all_files.len() as u64);
+    pb.set_style(
+        ProgressStyle::default_bar()
+            .template("{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {pos}/{len} files")
+            .unwrap()
+            .progress_chars("=> "),
+    );
+    pb.set_message("🔍 Hashing all files...");
+
+    let hash_map: HashMap<String, Vec<PathBuf>> = hash_files(all_files, algo, pb.clone());
+
+    pb.finish_with_message("✅ Finished hashing all files");
+
     let mut duplicates_found = false;
 
-    for ((ext, size), group) in batches {
-        if group.len() > 1 {
-            let hash_map = hash_files(group, algo.clone());
-            let has_duplicates_in_batch = hash_map.values().any(|paths| paths.len() > 1);
+    for (hash, paths) in &hash_map {
+        if paths.len() > 1 {
+            duplicates_found = true;
+            println!("\n🔁 Duplicate Hash: {}", hash);
+            for path in paths {
+                println!("    {}", path.display());
+            }
 
-            if has_duplicates_in_batch {
-                duplicates_found = true;
-                println!("\nBatch: .{} | {} bytes", ext, size);
-
-                for (hash, paths) in hash_map {
-                    if paths.len() > 1 {
-                        println!("  Hash: {}", hash);
-                        for path in &paths {
-                            println!("    {}", path.display());
-                        }
-                        processor(&paths);
+            if quarantine_flag {
+                let to_quarantine: Vec<PathBuf> = paths.iter().skip(1).cloned().collect();
+                if !to_quarantine.is_empty() {
+                    let quarantine_dir = dir.join(".deduck_quarantine");
+                    if let Err(e) = quarantine::quarantine_duplicates(to_quarantine, &quarantine_dir) {
+                        eprintln!("❌ Failed to quarantine: {}", e);
                     }
                 }
             }
@@ -60,19 +83,7 @@ where
 }
 
 pub fn handle_duplicates(dir: &Path, scan_choice: usize, quarantine: bool) {
-    let processor = |paths: &Vec<PathBuf>| {
-        if quarantine {
-            let to_quarantine: Vec<PathBuf> = paths.iter().skip(1).cloned().collect();
-            if !to_quarantine.is_empty() {
-                let quarantine_dir = dir.join(".deduck_quarantine");
-                if let Err(e) = quarantine::quarantine_duplicates(to_quarantine, &quarantine_dir) {
-                    eprintln!("Failed to quarantine: {}", e);
-                }
-            }
-        }
-    };
-
-    if let Err(e) = find_and_process_duplicates(dir, scan_choice, processor) {
-        eprintln!("An error occurred: {}", e);
+    if let Err(e) = find_and_process_duplicates(dir, scan_choice, quarantine) {
+        eprintln!("❌ An error occurred: {}", e);
     }
 }
