@@ -14,7 +14,8 @@ rayon = "1"
 dialoguer = "0.11"
 dirs = "4.0"
 indicatif = { version = "*", features = ["rayon"] }
-
+imagehash = "0.3.0"
+image = "0.24"  # or latest compatible version
 
 
 [lib]

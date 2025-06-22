@@ -8,3 +8,4 @@ pub mod quarantine;
 pub mod report;
 pub mod duplicates;
 pub mod utils;
+pub mod similar;

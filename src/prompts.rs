@@ -13,8 +13,8 @@ pub fn prompt_scan_mode() -> io::Result<usize> {
 
 pub fn prompt_clean_choice() -> io::Result<usize> {
     let clean_modes = &[
-        "Separate (move duplicates to quarantine)",
-        "Separate + Clean (move and delete quarantine folder)",
+        "Separate",
+        "Separate + Clean",
     ];
     Select::new()
         .with_prompt("Choose cleaning action")

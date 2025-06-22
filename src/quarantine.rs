@@ -18,7 +18,6 @@ pub fn quarantine_duplicates(files: Vec<PathBuf>, quarantine_dir: &Path) -> io::
 
     Ok(())
 }
-
 pub fn restore_quarantined(quarantine_dir: &Path, target_dir: &Path) -> io::Result<()> {
     if !quarantine_dir.exists() {
         return Err(io::Error::new(io::ErrorKind::NotFound, "No quarantine directory found."));

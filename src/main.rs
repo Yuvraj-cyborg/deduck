@@ -8,6 +8,7 @@ mod quarantine;
 mod report;
 mod duplicates;
 mod utils;
+mod similar;
 
 use clap::{Parser, Subcommand};
 use std::path::{PathBuf};
