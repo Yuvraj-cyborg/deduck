@@ -4,14 +4,9 @@ use std::path::{Path, PathBuf};
 
 use indicatif::{ProgressBar, ProgressStyle};
 
-use crate::{
-    scanner,
-    filters,
-    hasher::{hash_files, HashAlgorithm},
-    quarantine,
-};
+use crate::{scanner,filters,hasher::{hash_files, HashAlgorithm},quarantine};
 
-pub fn find_and_process_duplicates(dir: &Path,scan_choice: usize,quarantine_flag: bool,) -> io::Result<usize> {
+pub fn duplicates(dir: &Path,scan_choice: usize,quarantine_flag: bool) -> io::Result<usize> {
     let files = scanner::scan_directory(dir)?;
     let files_found = files.len();
 
@@ -35,10 +30,7 @@ pub fn find_and_process_duplicates(dir: &Path,scan_choice: usize,quarantine_flag
         _ => unreachable!(),
     };
 
-    let all_files: Vec<PathBuf> = batches
-        .values()
-        .flat_map(|v| v.clone())
-        .collect();
+    let all_files: Vec<PathBuf> = batches.values().flat_map(|v| v.clone()).collect();
 
     let pb = ProgressBar::new(all_files.len() as u64);
     pb.set_style(
@@ -66,7 +58,7 @@ pub fn find_and_process_duplicates(dir: &Path,scan_choice: usize,quarantine_flag
             if quarantine_flag {
                 let to_quarantine: Vec<PathBuf> = paths.iter().skip(1).cloned().collect();
                 if !to_quarantine.is_empty() {
-                    let quarantine_dir = dir.join(".deduck_quarantine");
+                    let quarantine_dir = quarantine::get_quarantine_dir(dir);
                     if let Err(e) = quarantine::quarantine_duplicates(to_quarantine, &quarantine_dir) {
                         eprintln!("❌ Failed to quarantine: {}", e);
                     }
@@ -80,10 +72,4 @@ pub fn find_and_process_duplicates(dir: &Path,scan_choice: usize,quarantine_flag
     }
 
     Ok(files_found)
-}
-
-pub fn handle_duplicates(dir: &Path, scan_choice: usize, quarantine: bool) {
-    if let Err(e) = find_and_process_duplicates(dir, scan_choice, quarantine) {
-        eprintln!("❌ An error occurred: {}", e);
-    }
 }

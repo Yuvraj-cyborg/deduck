@@ -1,8 +1,8 @@
-use crate::prompts;
-use crate::duplicates::handle_duplicates;
 use crate::config::save_scan_mode;
-use std::path::Path;
+use crate::duplicates;
+use crate::prompts;
 use std::io;
+use std::path::Path;
 
 pub fn run_filter(dir: &Path) -> io::Result<()> {
     let scan_choice = prompts::prompt_scan_mode()?;
@@ -11,7 +11,9 @@ pub fn run_filter(dir: &Path) -> io::Result<()> {
         eprintln!("Warning: failed to save scan mode: {}", e);
     }
 
-    handle_duplicates(dir, scan_choice, false);
+    if let Err(e) = duplicates::duplicates(dir, scan_choice, false) {
+        eprintln!("❌ An error occurred during filtering: {}", e);
+    }
 
     Ok(())
 }

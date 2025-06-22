@@ -1,6 +1,10 @@
+pub mod commands;
+pub mod config;
+pub mod prompts;
 pub mod scanner;
 pub mod filters;
 pub mod hasher;
-pub mod config;
-pub mod report;
 pub mod quarantine;
+pub mod report;
+pub mod duplicates;
+pub mod utils;

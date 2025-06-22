@@ -2,6 +2,10 @@ use std::fs;
 use std::io;
 use std::path::{Path, PathBuf};
 
+pub fn get_quarantine_dir(base_dir: &Path) -> PathBuf {
+    base_dir.join(".deduck_quarantine")
+}
+
 pub fn quarantine_duplicates(files: Vec<PathBuf>, quarantine_dir: &Path) -> io::Result<()> {
     fs::create_dir_all(quarantine_dir)?;
 
@@ -29,12 +33,5 @@ pub fn restore_quarantined(quarantine_dir: &Path, target_dir: &Path) -> io::Resu
     }
 
     fs::remove_dir_all(quarantine_dir)?;
-    Ok(())
-}
-
-pub fn purge_quarantine(quarantine_dir: &Path) -> io::Result<()> {
-    if quarantine_dir.exists() {
-        fs::remove_dir_all(quarantine_dir)?;
-    }
     Ok(())
 }

@@ -7,6 +7,7 @@ mod hasher;
 mod quarantine;
 mod report;
 mod duplicates;
+mod utils;
 
 use clap::{Parser, Subcommand};
 use std::path::{PathBuf};
@@ -24,39 +25,30 @@ use config::get_dir_or_saved;
 struct Cli {
     #[command(subcommand)]
     command: Commands,
+    #[arg(global = true, short, long)]
+    dir: Option<PathBuf>,
 }
 
 #[derive(Subcommand, Debug)]
 enum Commands {
-    Scan { #[arg(short, long)] dir: Option<PathBuf> },
-    Filter { 
-        #[arg(short, long)] 
-        dir: Option<PathBuf> 
-    },
-    Clean { #[arg(short, long)] dir: Option<PathBuf> },
-    Restore { #[arg(short, long)] dir: Option<PathBuf> },
-    Purge { #[arg(short, long)] dir: Option<PathBuf> },
+    Scan,
+    Filter,
+    Clean,
+    Restore,
+    Purge,
 }
 
 fn main() {
     let cli = Cli::parse();
 
-    let dir_opt = match &cli.command {
-        Commands::Scan { dir } => dir,
-        Commands::Filter { dir } => dir,
-        Commands::Clean { dir } => dir,
-        Commands::Restore { dir } => dir,
-        Commands::Purge { dir } => dir,
-    };
-
-    let dir = get_dir_or_saved(dir_opt);
+    let dir = get_dir_or_saved(&cli.dir);
 
     let result = match &cli.command {
-        Commands::Scan { .. } => scan::run_scan(dir.as_path()),
-        Commands::Filter { .. } => filter::run_filter(dir.as_path()),
-        Commands::Clean { .. } => clean::run_clean(dir.as_path()),
-        Commands::Restore { .. } => restore::run_restore(dir.as_path()),
-        Commands::Purge { .. } => purge::run_purge(dir.as_path()),
+        Commands::Scan => scan::run_scan(dir.as_path()),
+        Commands::Filter => filter::run_filter(dir.as_path()),
+        Commands::Clean => clean::run_clean(dir.as_path()),
+        Commands::Restore => restore::run_restore(dir.as_path()),
+        Commands::Purge => purge::run_purge(dir.as_path()),
     };
 
     if let Err(e) = result {

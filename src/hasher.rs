@@ -21,34 +21,28 @@ pub enum HashAlgorithm {
 pub fn hash_file(path: &PathBuf, algo: &HashAlgorithm) -> std::io::Result<String> {
     let file = File::open(path)?;
     let mut reader = BufReader::new(file);
-    let mut buffer = [0u8; 8192];
 
     match algo {
         HashAlgorithm::Sha256 => {
             let mut hasher = Sha256::new();
-            loop {
-                let count = reader.read(&mut buffer)?;
-                if count == 0 { break; }
-                hasher.update(&buffer[..count]);
-            }
+            std::io::copy(&mut reader, &mut hasher)?;
             Ok(format!("{:x}", hasher.finalize()))
         }
 
         HashAlgorithm::Blake3 => {
             let mut hasher = blake3::Hasher::new();
-            loop {
-                let count = reader.read(&mut buffer)?;
-                if count == 0 { break; }
-                hasher.update(&buffer[..count]);
-            }
+            hasher.update_reader(&mut reader)?;
             Ok(hasher.finalize().to_hex().to_string())
         }
 
         HashAlgorithm::XxHash => {
             let mut hasher = XxHash64::with_seed(0);
+            let mut buffer = [0u8; 8192];
             loop {
                 let count = reader.read(&mut buffer)?;
-                if count == 0 { break; }
+                if count == 0 {
+                    break;
+                }
                 hasher.write(&buffer[..count]);
             }
             Ok(format!("{:x}", hasher.finish()))

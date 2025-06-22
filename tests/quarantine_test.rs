@@ -2,7 +2,7 @@ use std::fs::{self, File};
 use std::io::Write;
 use tempfile::tempdir;
 
-use deduck::quarantine::{quarantine_duplicates, restore_quarantined, purge_quarantine};
+use deduck::quarantine::{quarantine_duplicates, restore_quarantined};
 
 #[test]
 fn test_quarantine_and_restore() {
@@ -37,20 +37,4 @@ fn test_quarantine_and_restore() {
     assert!(restore_dir.join("file2.txt").exists());
 }
 
-#[test]
-fn test_purge_quarantine() {
-    let temp_dir = tempdir().unwrap();
-    let quarantine_dir = temp_dir.path().join("quarantine");
 
-    fs::create_dir_all(&quarantine_dir).unwrap();
-
-    let dummy_file = quarantine_dir.join("dummy.txt");
-    let mut file = File::create(&dummy_file).unwrap();
-    writeln!(file, "dummy content").unwrap();
-
-    assert!(dummy_file.exists());
-
-    purge_quarantine(&quarantine_dir).unwrap();
-
-    assert!(!quarantine_dir.exists());
-}
