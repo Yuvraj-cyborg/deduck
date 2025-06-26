@@ -20,10 +20,28 @@ pub fn duplicates(dir: &Path, scan_choice: usize, quarantine_flag: bool) -> io::
         return Ok(0);
     }
 
-    let all_files: Vec<PathBuf> = if scan_choice == 2 {
-        files
+    let doc_exts = ["pdf", "txt", "doc", "xlsx"];
+    let image_exts = ["png", "jpg", "jpeg"];
+
+    let (doc_files, image_files, all_files): (Vec<PathBuf>, Vec<PathBuf>, Vec<PathBuf>) = if scan_choice == 2 {
+        let mut docs = Vec::new();
+        let mut images = Vec::new();
+
+        for file in &files {
+            if let Some(ext) = file.extension().and_then(|e| e.to_str()) {
+                let ext = ext.to_lowercase();
+                if doc_exts.contains(&ext.as_str()) {
+                    docs.push(file.clone());
+                } else if image_exts.contains(&ext.as_str()) {
+                    images.push(file.clone());
+                }
+            }
+        }
+
+        let all = docs.iter().chain(images.iter()).cloned().collect();
+        (docs, images, all)
     } else {
-        let allowed_exts = ["pdf", "txt", "doc", "xlsx","png","jpeg","jpg"];
+        let allowed_exts = ["pdf", "txt", "doc", "xlsx", "png", "jpeg", "jpg"];
         let batches = filters::batch(files, &allowed_exts)?;
 
         if batches.is_empty() {
@@ -31,27 +49,40 @@ pub fn duplicates(dir: &Path, scan_choice: usize, quarantine_flag: bool) -> io::
             return Ok(files_found);
         }
 
-        batches.values().flat_map(|v| v.clone()).collect()
+        let flat: Vec<PathBuf> = batches.values().flat_map(|v| v.clone()).collect();
+        (flat.clone(), vec![], flat)
     };
 
     let algo = match scan_choice {
         0 => HashAlgorithm::XxHash,
         1 => HashAlgorithm::Blake3,
-        2 => HashAlgorithm::Sha256,
+        2 => HashAlgorithm::Sha256, 
         _ => unreachable!(),
     };
 
-    let pb = ProgressBar::new(all_files.len() as u64);
+    let pb = ProgressBar::new(
+        if scan_choice == 2 {
+            doc_files.len()
+        } else {
+            all_files.len()
+        } as u64
+    );
+
     pb.set_style(
         ProgressStyle::default_bar()
             .template("{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {pos}/{len} files")
             .unwrap()
             .progress_chars("=> "),
     );
-    pb.set_message("🔍 Hashing all files...");
+    pb.set_message("🔍 Hashing files...");
 
-    let hash_map: HashMap<String, Vec<PathBuf>> = hash_files(all_files.clone(), algo, pb.clone());
-    pb.finish_with_message("✅ Finished hashing all files");
+    let hash_map: HashMap<String, Vec<PathBuf>> = if scan_choice == 2 {
+        hash_files(doc_files.clone(), HashAlgorithm::Sha256, pb.clone())
+    } else {
+        hash_files(all_files.clone(), algo, pb.clone())
+    };
+
+    pb.finish_with_message("✅ Finished hashing files");
 
     let mut duplicates_found = false;
     let mut similar_found = false;
@@ -59,20 +90,7 @@ pub fn duplicates(dir: &Path, scan_choice: usize, quarantine_flag: bool) -> io::
 
     if scan_choice == 2 {
         println!("🔍 Performing image similarity scan...");
-
-        let image_exts = ["png", "jpg", "jpeg"];
-        let image_files: Vec<PathBuf> = all_files
-            .iter()
-            .filter(|f| {
-                f.extension()
-                    .and_then(|e| e.to_str())
-                    .map(|ext| image_exts.contains(&ext.to_lowercase().as_str()))
-                    .unwrap_or(false)
-            })
-            .cloned()
-            .collect();
-
-        let similar_map = similar_images(image_files, 10);
+        let similar_map = similar_images(image_files.clone(), 10);
 
         for (base, similars) in &similar_map {
             if !similars.is_empty() {
@@ -85,7 +103,7 @@ pub fn duplicates(dir: &Path, scan_choice: usize, quarantine_flag: bool) -> io::
 
                 let mut similar_group = vec![base.clone()];
                 similar_group.extend(similars.clone());
-                to_quarantine.extend(similar_group.into_iter().skip(1)); 
+                to_quarantine.extend(similar_group.into_iter().skip(1));
             }
         }
     }
@@ -103,14 +121,13 @@ pub fn duplicates(dir: &Path, scan_choice: usize, quarantine_flag: bool) -> io::
     }
 
     if quarantine_flag && !to_quarantine.is_empty() {
-    let quarantine_dir = quarantine::get_quarantine_dir(dir);
-    if let Err(e) = quarantine::quarantine_duplicates(to_quarantine, &quarantine_dir) {
-        eprintln!("❌ Failed to quarantine files: {}", e);
-    }
+        let quarantine_dir = quarantine::get_quarantine_dir(dir);
+        if let Err(e) = quarantine::quarantine_duplicates(to_quarantine, &quarantine_dir) {
+            eprintln!("❌ Failed to quarantine files: {}", e);
+        }
     }
 
-
-    if !duplicates_found && !similar_found{
+    if !duplicates_found && !similar_found {
         println!("✅ No duplicate or similar files found.");
     }
 

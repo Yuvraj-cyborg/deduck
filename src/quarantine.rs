@@ -10,14 +10,22 @@ pub fn quarantine_duplicates(files: Vec<PathBuf>, quarantine_dir: &Path) -> io::
     fs::create_dir_all(quarantine_dir)?;
 
     for file in files {
+        if !file.exists() {
+            eprintln!("File not found, skipping quarantine: {}", file.display());
+            continue;
+        }
+
         if let Some(filename) = file.file_name() {
             let dest = quarantine_dir.join(filename);
-            fs::rename(&file, dest)?;
+            if let Err(e) = fs::rename(&file, &dest) {
+                eprintln!("Failed to quarantine file {}: {}", file.display(), e);
+            }
         }
     }
 
     Ok(())
 }
+
 pub fn restore_quarantined(quarantine_dir: &Path, target_dir: &Path) -> io::Result<()> {
     if !quarantine_dir.exists() {
         return Err(io::Error::new(io::ErrorKind::NotFound, "No quarantine directory found."));
