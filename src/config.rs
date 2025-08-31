@@ -1,4 +1,3 @@
-//Here config.rs handles saving file paths temporarily so after filter command is run, the last directory and scan mode are saved for future use.
 use std::fs;
 use std::io::{self, Write};
 use std::path::{Path, PathBuf};
