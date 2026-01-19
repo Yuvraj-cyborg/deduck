@@ -1,7 +1,7 @@
+use dirs;
 use std::fs;
 use std::io::{self, Write};
 use std::path::{Path, PathBuf};
-use dirs;
 
 const CONFIG_DIR_NAME: &str = ".deduck";
 const LAST_DIR_FILE: &str = "last_dir.txt";
@@ -76,6 +76,8 @@ pub fn get_dir_or_saved(dir_opt: &Option<PathBuf>) -> PathBuf {
         return saved_dir;
     }
 
-    eprintln!("❌ Error: No directory specified and no saved directory found.\n➡️ Please specify --dir.");
+    eprintln!(
+        "❌ Error: No directory specified and no saved directory found.\n➡️ Please specify --dir."
+    );
     std::process::exit(1);
 }

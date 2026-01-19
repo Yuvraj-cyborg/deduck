@@ -1,6 +1,6 @@
 use crate::scanner;
-use std::path::Path;
 use std::io;
+use std::path::Path;
 
 pub fn run_scan(dir: &Path) -> io::Result<()> {
     match scanner::scan_directory(dir) {

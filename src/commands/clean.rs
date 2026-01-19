@@ -1,10 +1,10 @@
-use crate::prompts;
-use crate::duplicates;
-use crate::report::Report;
 use crate::config::load_scan_mode;
+use crate::duplicates;
+use crate::prompts;
+use crate::report::Report;
+use crate::utils::{delete_quarantine_dir, process_quarantined_files};
 use std::io;
 use std::path::Path;
-use crate::utils::{delete_quarantine_dir, process_quarantined_files};
 
 pub fn run_clean(dir: &Path) -> io::Result<()> {
     let scan_choice = match load_scan_mode() {
@@ -20,7 +20,7 @@ pub fn run_clean(dir: &Path) -> io::Result<()> {
 
     let mut report = Report::new();
 
-    let files_found = duplicates::duplicates(dir,scan_choice,true)?;
+    let files_found = duplicates::duplicates(dir, scan_choice, true)?;
 
     report.set_files_found(files_found);
     process_quarantined_files(&quarantine_dir, &mut report)?;

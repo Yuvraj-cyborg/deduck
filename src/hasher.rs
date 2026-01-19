@@ -1,13 +1,13 @@
+use blake3;
+use indicatif::{ParallelProgressIterator, ProgressBar};
+use rayon::prelude::*;
+use sha2::{Digest, Sha256};
+use std::collections::HashMap;
 use std::fs::File;
+use std::hash::Hasher;
 use std::io::{BufReader, Read};
 use std::path::PathBuf;
-use std::collections::HashMap;
-use rayon::prelude::*;
-use indicatif::{ProgressBar, ParallelProgressIterator};
-use sha2::{Sha256, Digest};
-use blake3;
 use twox_hash::XxHash64;
-use std::hash::Hasher;
 
 #[derive(Debug, Clone)]
 pub enum HashAlgorithm {
@@ -45,18 +45,23 @@ pub fn hash_file(path: &PathBuf, algo: &HashAlgorithm) -> std::io::Result<String
         return Ok(format!("{:x}", hasher.finish()));
     }
 
-    Err(std::io::Error::new(std::io::ErrorKind::Other, "Unsupported hash algorithm"))
+    Err(std::io::Error::new(
+        std::io::ErrorKind::Other,
+        "Unsupported hash algorithm",
+    ))
 }
 
-pub fn hash_files(files: Vec<PathBuf>, algo: HashAlgorithm, pb: ProgressBar) -> HashMap<String, Vec<PathBuf>> {
+pub fn hash_files(
+    files: Vec<PathBuf>,
+    algo: HashAlgorithm,
+    pb: ProgressBar,
+) -> HashMap<String, Vec<PathBuf>> {
     let maps: Vec<HashMap<String, Vec<PathBuf>>> = files
         .par_iter()
         .progress_with(pb)
-        .filter_map(|file| {
-            match hash_file(file, &algo) {
-                Ok(hash) => Some((hash, file.clone())),
-                Err(_) => None,
-            }
+        .filter_map(|file| match hash_file(file, &algo) {
+            Ok(hash) => Some((hash, file.clone())),
+            Err(_) => None,
         })
         .map(|(hash, path)| {
             let mut map = HashMap::new();

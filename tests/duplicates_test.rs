@@ -66,15 +66,43 @@ fn test_find_and_process_duplicates_with_quarantine() {
     let txt_dupes = ["file1.txt", "file2.txt"];
     let img_dupes = ["file4.png", "file5.png"];
 
-    let quarantined_txt_dupes: Vec<_> = txt_dupes.iter().filter(|f| quarantined.contains(**f)).collect();
-    let remaining_txt_dupes: Vec<_> = txt_dupes.iter().filter(|f| remaining.contains(**f)).collect();
-    assert_eq!(quarantined_txt_dupes.len(), 1, "One .txt duplicate should be quarantined");
-    assert_eq!(remaining_txt_dupes.len(), 1, "One .txt duplicate should remain");
+    let quarantined_txt_dupes: Vec<_> = txt_dupes
+        .iter()
+        .filter(|f| quarantined.contains(**f))
+        .collect();
+    let remaining_txt_dupes: Vec<_> = txt_dupes
+        .iter()
+        .filter(|f| remaining.contains(**f))
+        .collect();
+    assert_eq!(
+        quarantined_txt_dupes.len(),
+        1,
+        "One .txt duplicate should be quarantined"
+    );
+    assert_eq!(
+        remaining_txt_dupes.len(),
+        1,
+        "One .txt duplicate should remain"
+    );
 
-    let quarantined_img_dupes: Vec<_> = img_dupes.iter().filter(|f| quarantined.contains(**f)).collect();
-    let remaining_img_dupes: Vec<_> = img_dupes.iter().filter(|f| remaining.contains(**f)).collect();
-    assert_eq!(quarantined_img_dupes.len(), 1, "One .png duplicate should be quarantined");
-    assert_eq!(remaining_img_dupes.len(), 1, "One .png duplicate should remain");
+    let quarantined_img_dupes: Vec<_> = img_dupes
+        .iter()
+        .filter(|f| quarantined.contains(**f))
+        .collect();
+    let remaining_img_dupes: Vec<_> = img_dupes
+        .iter()
+        .filter(|f| remaining.contains(**f))
+        .collect();
+    assert_eq!(
+        quarantined_img_dupes.len(),
+        1,
+        "One .png duplicate should be quarantined"
+    );
+    assert_eq!(
+        remaining_img_dupes.len(),
+        1,
+        "One .png duplicate should remain"
+    );
 
     assert!(remaining.contains("file3.txt")); // unique
 }

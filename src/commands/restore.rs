@@ -1,6 +1,6 @@
 use crate::quarantine;
-use std::path::Path;
 use std::io;
+use std::path::Path;
 
 pub fn run_restore(dir: &Path) -> io::Result<()> {
     let quarantine_dir = quarantine::get_quarantine_dir(dir);
@@ -12,6 +12,6 @@ pub fn run_restore(dir: &Path) -> io::Result<()> {
         Err(e) => {
             eprintln!("❌ Failed to restore quarantined files: {}", e);
             Err(e)
-        },
+        }
     }
 }

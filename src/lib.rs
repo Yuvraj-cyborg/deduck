@@ -1,11 +1,11 @@
 pub mod commands;
 pub mod config;
-pub mod prompts;
-pub mod scanner;
+pub mod duplicates;
 pub mod filters;
 pub mod hasher;
+pub mod prompts;
 pub mod quarantine;
 pub mod report;
-pub mod duplicates;
-pub mod utils;
+pub mod scanner;
 pub mod similar;
+pub mod utils;

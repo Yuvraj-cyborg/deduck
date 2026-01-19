@@ -12,10 +12,7 @@ pub fn prompt_scan_mode() -> io::Result<usize> {
 }
 
 pub fn prompt_clean_choice() -> io::Result<usize> {
-    let clean_modes = &[
-        "Separate",
-        "Separate + Clean",
-    ];
+    let clean_modes = &["Separate", "Separate + Clean"];
     Select::new()
         .with_prompt("Choose cleaning action")
         .default(0)

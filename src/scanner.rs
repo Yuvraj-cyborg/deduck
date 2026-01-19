@@ -4,7 +4,10 @@ use walkdir::WalkDir;
 
 pub fn scan_directory(dir: &Path) -> io::Result<Vec<PathBuf>> {
     if !dir.exists() {
-        return Err(io::Error::new(io::ErrorKind::NotFound, "Directory does not exist"));
+        return Err(io::Error::new(
+            io::ErrorKind::NotFound,
+            "Directory does not exist",
+        ));
     }
 
     let files: Vec<PathBuf> = WalkDir::new(dir)

@@ -1,17 +1,17 @@
 mod commands;
 mod config;
-mod prompts;
-mod scanner;
+mod duplicates;
 mod filters;
 mod hasher;
+mod prompts;
 mod quarantine;
 mod report;
-mod duplicates;
-mod utils;
+mod scanner;
 mod similar;
+mod utils;
 
 use clap::{Parser, Subcommand};
-use std::path::{PathBuf};
+use std::path::PathBuf;
 use std::process::exit;
 
 use commands::{clean, filter, purge, restore, scan};

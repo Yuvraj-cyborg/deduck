@@ -13,7 +13,8 @@ fn test_scan_directory_basic() {
 
     let result = scan_directory(dir.path()).unwrap();
 
-    let mut found = result.iter()
+    let mut found = result
+        .iter()
         .map(|p| p.file_name().unwrap().to_str().unwrap().to_string())
         .collect::<Vec<_>>();
 

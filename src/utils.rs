@@ -3,7 +3,7 @@ use std::fs;
 use std::io;
 use std::path::Path;
 
-pub fn process_quarantined_files(quarantine_dir: &Path,report: &mut Report) -> io::Result<()> {
+pub fn process_quarantined_files(quarantine_dir: &Path, report: &mut Report) -> io::Result<()> {
     if !quarantine_dir.exists() {
         return Ok(());
     }
@@ -27,4 +27,4 @@ pub fn delete_quarantine_dir(path: &Path) -> io::Result<()> {
         println!("🗑️ Quarantine folder deleted: {}", path.display());
     }
     Ok(())
-} 
+}

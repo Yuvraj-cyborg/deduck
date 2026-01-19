@@ -1,7 +1,7 @@
 use deduck::filters::batch;
+use std::fs::File;
 use std::io::Write;
-use std::path::{PathBuf};
-use std::fs::{File};
+use std::path::PathBuf;
 
 fn create_dummy_file(path: &PathBuf, size: usize) {
     let mut file = File::create(path).unwrap();

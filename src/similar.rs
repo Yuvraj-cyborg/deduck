@@ -1,7 +1,7 @@
+use image::io::Reader as ImageReader;
+use imagehash::perceptual_hash;
 use std::collections::HashMap;
 use std::path::PathBuf;
-use image::io::Reader as ImageReader;
-use imagehash::{perceptual_hash};
 
 pub fn similar_images(files: Vec<PathBuf>, threshold: u32) -> HashMap<PathBuf, Vec<PathBuf>> {
     let mut hashes = Vec::new();
@@ -25,7 +25,10 @@ pub fn similar_images(files: Vec<PathBuf>, threshold: u32) -> HashMap<PathBuf, V
         for (path_j, hash_j) in hashes.iter().skip(i + 1) {
             let dist = hamming_distance(&hash_i.bits, &hash_j.bits);
             if dist <= threshold {
-                groups.entry(path_i.clone()).or_default().push(path_j.clone());
+                groups
+                    .entry(path_i.clone())
+                    .or_default()
+                    .push(path_j.clone());
             }
         }
     }

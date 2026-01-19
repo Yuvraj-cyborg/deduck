@@ -22,7 +22,11 @@ fn test_quarantine_and_restore() {
     writeln!(file1, "hello world").unwrap();
     writeln!(file2, "hello rust").unwrap();
 
-    quarantine_duplicates(vec![file1_path.clone(), file2_path.clone()], &quarantine_dir).unwrap();
+    quarantine_duplicates(
+        vec![file1_path.clone(), file2_path.clone()],
+        &quarantine_dir,
+    )
+    .unwrap();
 
     assert!(!file1_path.exists());
     assert!(!file2_path.exists());
@@ -36,5 +40,3 @@ fn test_quarantine_and_restore() {
     assert!(restore_dir.join("file1.txt").exists());
     assert!(restore_dir.join("file2.txt").exists());
 }
-
-

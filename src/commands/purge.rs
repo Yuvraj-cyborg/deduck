@@ -1,7 +1,7 @@
-use crate::utils::{delete_quarantine_dir, process_quarantined_files};
 use crate::report::Report;
-use std::path::Path;
+use crate::utils::{delete_quarantine_dir, process_quarantined_files};
 use std::io;
+use std::path::Path;
 
 pub fn run_purge(dir: &Path) -> io::Result<()> {
     let quarantine_dir = crate::quarantine::get_quarantine_dir(dir);
