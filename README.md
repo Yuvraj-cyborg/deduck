@@ -4,20 +4,20 @@
 
 ![Architecture](./assets/architecture.jpeg)
 
-## 🚀 Features
+## Features
 
-- 🔍 **Scan** directories recursively
-- ⚡ **Filter** files by extension & size
-- 🧠 Choose **scan mode**: Quick / Normal / Deep (XxHash / Blake3 / Sha256)
-- 📁 **Quarantine** duplicates safely
-- 🧼 **Clean** up storage and track how much space you saved
-- ♻️ **Restore** quarantined files
-- 🗑️ **Purge** quarantine folder
-- 📊 **Reports**: See files found, deleted, and total bytes saved
+- **Scan** directories recursively
+- **Filter** files by extension & size
+- Choose **scan mode**: Quick / Normal / Deep (XxHash / Blake3 / Sha256)
+- **Quarantine** duplicates safely
+- **Clean** up storage and track how much space you saved
+- **Restore** quarantined files
+- **Purge** quarantine folder
+- **Reports**: See files found, deleted, and total bytes saved
 
 ---
 
-## 🛠️ Local Setup
+##  Local Setup
 
 ### 1. Clone the Repo
 
@@ -58,43 +58,43 @@ Make sure `~/.cargo/bin` is in your PATH:
 echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> ~/.zshrc   # or ~/.bashrc
 source ~/.zshrc                                           # or source ~/.bashrc
 ```
-## 📦 Usage
+## Usage
 
-### 🧪 Scan Directory
+### Scan Directory
 
 ```bash
 deduck scan --dir /path/to/folder
 ```
 
-### 🧠 Filter Duplicates (and choose scan mode)
+### Filter Duplicates (and choose scan mode)
 
 ```bash
 deduck filter --dir /path/to/folder
 ```
 
-### ♻️ Clean Duplicates (requires filter to be run first)
+### Clean Duplicates (requires filter to be run first)
 
 ```bash
 deduck clean
 ```
 
-### 🔄 Restore Files
+### Restore Files
 
 ```bash
 deduck restore
 ```
 
-### 🗑️ Purge Quarantine Folder
+### Purge Quarantine Folder
 
 ```bash
 deduck purge
 ```
-## 📝 Saved State
+## Saved State
 
 - Last scanned directory is saved in `~/.deduck/last_dir.txt`
 - Last scan mode is saved in `~/.deduck/scan_mode.txt`
 
-## 🧪 Tests
+## Tests
 
 To run unit tests:
 
@@ -102,37 +102,6 @@ To run unit tests:
 cargo test
 ```
 
-## 📄 Architecture
 
-See the architecture diagram above ☝️
 
-## 📂 Folder Structure
-
-```
-deduck/
-├── src/
-│   ├── main.rs
-│   ├── config.rs
-│   ├── duplicates.rs
-│   ├── filters.rs
-│   ├── hasher.rs
-│   ├── lib.rs
-│   ├── prompts.rs
-│   ├── quarantine.rs
-│   ├── report.rs
-│   ├── scanner.rs
-│   └── commands/
-│       ├── clean.rs
-│       ├── filter.rs
-│       ├── mod.rs
-│       ├── purge.rs
-│       ├── restore.rs
-│       └── scan.rs
-├── tests/
-│   ├── filter_test.rs
-│   ├── hasher_test.rs
-│   ├── quarantine_test.rs
-│   └── scanner_test.rs
-└── assets/
-    └── architecture.jpeg
 ```
